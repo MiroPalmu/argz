@@ -323,5 +323,177 @@ int main(int argc, char* argv[])
        expect(input_opt.value() == "./../some quoted path.txt") << "actual: " << input_opt.value_or("Empty");
    };
 
+   test("test0-with-equal-signs") = [&] {
+      boolean = false; // Reset not to be right on default
+      parse_string(R"(program.exe -i=some_file --study study_file --boolean --number=12345)");
+
+      expect(input == "some_file");
+      expect(study == "study_file");
+      expect(number == 12345);
+      expect(boolean == true);
+
+
+   };
+
+   test("test1-with-equal-signs") = [&] {
+      boolean = false; // Reset not to be right on default
+      parse_string(R"(program.exe -i some/path --study=sas --boolean=anything-can-go-here --number=12)");
+
+      expect(input == "some/path");
+      expect(study == "s");
+      expect(number == 12);
+      expect(boolean == true);
+   };
+
+
+   test("test3-with-equal-signs") = [&] {
+       boolean = false; // Reset not to be right on default
+       parse_string(R"(program.exe -i="some/path" --study="s" --boolean --number=22 )");
+       expect(input == "some/path");
+       expect(study == "s");
+       expect(number == 22);
+       expect(boolean == true);
+   };
+
+   test("test4-with-equal-signs") = [&] {
+       boolean = false; // Reset not to be right on default
+       parse_string(R"(program.exe -i                                 some/path --study=s --boolean -- )");
+       expect(input == "some/path");
+       expect(study == "s");
+       expect(number == 22);
+       expect(boolean == true);
+   };
+
+   test("test6-with-equal-signs") = [&] {
+       boolean = false; // Reset not to be right on default
+       expect(nothrow([&] {parse_string(R"(program.exe -i=some/path --study=s --boolean   --        )"); }));
+       expect(input == "some/path");
+       expect(study == "s");
+       expect(boolean == true);
+
+   };
+
+   test("test7-with-equal-signs") = [&] {
+       boolean = false; // Reset not to be right on default
+       expect(throws([&] {parse_string(R"(program.exe -i some/path --study=s --boolean  27 --number true)"); }));
+   };
+
+
+   test("test-dashes-with-equal-signs") = [&] {
+       parse_string(R"(program.exe -i=./some-path-with-dashes.txt )");
+       expect(input == std::string("./some-path-with-dashes.txt")) << "actual: " << input;
+   };
+
+   test("quoted_path-with-equal-signs") = [&] {
+       parse_string(R"(program.exe -i="./../some quoted path.txt" )");
+       expect(input == "./../some quoted path.txt") << "actual: " << input;
+   };
+
+   test("opt_test0") = [&] {
+      boolean = false; // Reset not to be right on default
+      input_opt = {};
+      study_opt = {};
+      number_opt = {};
+
+      parse_string(R"(program.exe --input_opt some_file --study_opt study_file --boolean --number_opt 12345)");
+
+      expect(input_opt.value() == "some_file");
+      expect(study_opt.value() == "study_file");
+      expect(number_opt.value() == 12345);
+      expect(boolean == true);
+
+
+   };
+
+   test("opt_test1") = [&] {
+      boolean = false; // Reset not to be right on default
+      input_opt = {};
+      study_opt = {};
+      number_opt = {};
+
+      parse_string(R"(program.exe --input_opt some/path --study_opt s --boolean --number_opt 12)");
+
+      expect(input_opt.value() == "some/path");
+      expect(study_opt.value() == "s");
+      expect(number_opt.value() == 12);
+      expect(boolean == true);
+   };
+
+   test("opt_test2") = [&] {
+       parse_string(R"(program.exe --input_opt)");
+   };
+
+   test("opt_test3") = [&] {
+       boolean = false; // Reset not to be right on default
+       input_opt = {};
+       study_opt = {};
+       number_opt = {};
+
+       parse_string(R"(program.exe --input_opt "some/path" --study_opt "s" --boolean --number_opt 22 )");
+       expect(input_opt.value() == "some/path");
+       expect(study_opt.value() == "s");
+       expect(number_opt.value() == 22);
+       expect(boolean == true);
+   };
+
+   test("opt_test4") = [&] {
+       boolean = false; // Reset not to be right on default
+       input_opt = {};
+       study_opt = {};
+       number_opt = {};
+
+       parse_string(R"(program.exe --input_opt                                 some/path --study_opt s --boolean -- )");
+       expect(input_opt.value() == "some/path");
+       expect(study_opt == "s");
+       expect(!number_opt.has_value());
+       expect(boolean == true);
+   };
+
+   test("opt_test5") = [&] {
+       expect(nothrow([&] {parse_string(R"(program.exe -h)"); }));
+   };
+
+   test("opt_test6") = [&] {
+       boolean = false; // Reset not to be right on default
+       input_opt = {};
+       study_opt = {};
+       number_opt = {};
+
+       expect(nothrow([&] {parse_string(R"(program.exe --input_opt some/path --study_opt s --boolean   --        )"); }));
+
+       expect(input_opt.value() == "some/path");
+       expect(study_opt.value() == "s");
+       expect(!number_opt.has_value());
+       expect(boolean == true);
+
+   };
+
+   test("opt_test7") = [&] {
+       expect(throws([&] {parse_string(R"(program.exe --input_opt some/path --study_opt s --boolean  27 --number_opt true)"); }));
+   };
+
+   test("opt_test8") = [&] {
+       boolean = false; // Reset not to be right on default
+       input_opt = {};
+       study_opt = {};
+       number_opt = {};
+
+       expect(nothrow([&] {parse_string(R"(program.exe - )"); }));
+
+       expect(!input_opt.has_value());
+       expect(!study_opt.has_value());
+       expect(!number_opt.has_value());
+       expect(boolean == false);
+   };
+
+   test("opt_test-dashes") = [&] {
+       parse_string(R"(program.exe --input_opt ./some-path-with-dashes.txt )");
+       expect(input_opt.value() == std::string("./some-path-with-dashes.txt")) << "actual: " << input_opt.value_or("Empty");
+   };
+
+   test("opt_quoted_path") = [&] {
+       parse_string(R"(program.exe --input_opt "./../some quoted path.txt" )");
+       expect(input_opt.value() == "./../some quoted path.txt") << "actual: " << input_opt.value_or("Empty");
+   };
    return 0;
 }

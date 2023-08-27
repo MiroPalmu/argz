@@ -12,9 +12,11 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -153,7 +155,11 @@ namespace argz
          if (*flag == '-') {
             ++flag;
          }
+
          std::string_view str{ flag };
+         const auto equal_sign_in_str = std::ranges::find(str, '=');
+         str = std::string_view(str.begin(), equal_sign_in_str);
+
          if (str == "h" || str == "help") {
             help(about, opts);
             continue;
@@ -176,7 +182,11 @@ namespace argz
                   std::get<ref<bool>>(v).get() = true;
                }
                else {
-                  detail::parse(argv[++i], v);
+                  if (equal_sign_in_str == std::end(str)) {
+                     detail::parse(argv[++i], v);
+                  } else {
+                     detail::parse(std::next(equal_sign_in_str), v);
+                  }
                }
             }
          }
