@@ -337,7 +337,7 @@ int main(int argc, char* argv[])
 
    test("test1-with-equal-signs") = [&] {
       boolean = false; // Reset not to be right on default
-      parse_string(R"(program.exe -i some/path --study=sas --boolean=anything-can-go-here --number=12)");
+      parse_string(R"(program.exe -i some/path --study=s --boolean=anything-can-go-here --number=12)");
 
       expect(input == "some/path");
       expect(study == "s");
