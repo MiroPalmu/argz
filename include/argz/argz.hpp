@@ -158,6 +158,7 @@ namespace argz
 
          std::string_view str{ flag };
          const auto equal_sign_in_str = std::ranges::find(str, '=');
+         const auto str_contains_equal_sign = equal_sign_in_str != str.end();
          str = std::string_view(str.begin(), equal_sign_in_str);
 
          if (str == "h" || str == "help") {
@@ -182,10 +183,10 @@ namespace argz
                   std::get<ref<bool>>(v).get() = true;
                }
                else {
-                  if (equal_sign_in_str == std::end(str)) {
-                     detail::parse(argv[++i], v);
-                  } else {
+                  if (str_contains_equal_sign) {
                      detail::parse(std::next(equal_sign_in_str), v);
+                  } else {
+                     detail::parse(argv[++i], v);
                   }
                }
             }
